@@ -99,7 +99,7 @@
     </bpmn:userTask>
     <bpmn:sequenceFlow id="Flow_04b63jc" sourceRef="Activity_01d9t81" targetRef="Event_15vmvzz" />
     <bpmn:sequenceFlow id="Flow_13d7xmf" name="Error" sourceRef="Gateway_1mgityt" targetRef="Gateway_1jzhhrx">
-      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">0</bpmn:conditionExpression>
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=0</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="Flow_0w7nav9" sourceRef="Gateway_1jzhhrx" targetRef="Activity_01d9t81" />
     <bpmn:parallelGateway id="Gateway_1jzhhrx" name="">

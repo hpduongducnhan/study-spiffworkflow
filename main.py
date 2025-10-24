@@ -34,7 +34,7 @@ def main():
     core_runner.run(bpmn_file)
 
 
-    core_runner.run(bpmn_file, wf_id='1_1')
+    # core_runner.run(bpmn_file, wf_id='1_1')
 
 
 if __name__ == "__main__":

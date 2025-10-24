@@ -34,9 +34,15 @@ class CoreRunner:
 
     def _show_info_tasks(self, tasks, prefix: str = ''):
         for task in tasks:
-            task: Task
             task_spec: BpmnTaskSpec = task.task_spec
-            print(f"{prefix}Task ID: {task.id}, Name: {task_spec.name}, State: {TaskState.get_name(task.state)}, Spec: {task_spec.task_info(task)}")
+            print(f"{prefix}Task ID: {task.id}, Name: {task_spec.name}, State: {TaskState.get_name(task.state)}")
+            print(f'\t\t Task: type', type(task_spec))
+            print(f'\t\t Spec: input', task_spec.inputs)
+            print(f'\t\t Spec: output', task_spec.outputs)
+            print(f'\t\t Spec: name', task_spec.name)
+            print(f'\t\t Spec: description', task_spec.description)
+            print(f'\t\t Spec: data', task_spec.data)
+
 
     def _show_wf_state(self, workflow: BpmnWorkflow):
         wf_spec: BpmnProcessSpec = workflow.spec
