@@ -31,7 +31,7 @@ def main():
         '1.xml'
     )
 
-    # core_runner.run(bpmn_file)
+    core_runner.run(bpmn_file)
 
 
     core_runner.run(bpmn_file, wf_id='1_1')

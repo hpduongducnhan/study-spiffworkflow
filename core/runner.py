@@ -12,12 +12,14 @@ from SpiffWorkflow.serializer.json import JSONSerializer, DictionarySerializer
 
 from .storage import Storage
 from .node_manager import NodeManager
+from .service_tasks import service_task_manager
 
 
 class CoreRunner:
-    def __init__(self, storage: Storage, node_manager: NodeManager):
+    def __init__(self, storage: Storage, node_manager: NodeManager, service_task_manager=service_task_manager):
         self.storage = storage
         self.node_manager = node_manager
+        self.service_task_manager = service_task_manager
 
     def _parse_bpmn(self, bpmn_file_content: str) -> BpmnParser:
         bpmn_parser = BpmnParser()
@@ -61,7 +63,6 @@ class CoreRunner:
         return ready_event_tasks
     
     def _run_until_user_input_required(self, workflow: BpmnWorkflow):
-        BpmnTaskSpec
         task = workflow.get_next_task(state=TaskState.READY, manual=False)
         while task is not None:
             print('get ready auto task:', task.id, task.task_spec.name, type(task.task_spec))
@@ -97,19 +98,12 @@ class CoreRunner:
 
     def _resume_workflow(self, bpmn_config_file: str, wf_id: str):
         # Load lại BPMN spec từ file BPMN gốc
-        wf_content = self.storage.load_bpmn_config(bpmn_config_file)
-        bpmn_parser = self._parse_bpmn(wf_content)
-        main_spec = self._get_main_spec(bpmn_parser)
-
-        wf = BpmnWorkflow(main_spec)
-
+       
         # Lấy dữ liệu runtime đã snapshot
-        wf_runtime = self.storage.get_snapshot_workflow(wf_id)
+        wf_runtime = self.storage.get_workflow_from_snapshot(wf_id)
         print('type of wf_runtime:', type(wf_runtime))
-        # Deserialize với spec context
-        # wf = BpmnWorkflow.deserialize(JSONSerializer(), wf_runtime)
-        wf.deserialize(JSONSerializer(), wf_runtime)
-        wf = self._run_until_user_input_required(wf)
+
+        wf = self._run_until_user_input_required(wf_runtime)
 
         if wf.is_completed():
             print("Workflow completed.")
