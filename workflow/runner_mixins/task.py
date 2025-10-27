@@ -20,7 +20,7 @@ class RunnerTaskMixin:
         # TODO: for quickly loadtest, I random sleep here to simulate service task processing time
         # then complete the task
         # you should user scriptengine or custom task spec to implement your service task logic
-        sleep_secs = random.uniform(0.1, 10)
+        sleep_secs = random.uniform(0.1, 5)
         await asyncio.sleep(sleep_secs)
         task.complete()
         print(f'\t\t Service Task {task.id} - {kwargs.get("wf_id")} Completed in {sleep_secs:.2f} seconds.')

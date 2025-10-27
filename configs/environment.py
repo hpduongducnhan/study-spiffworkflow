@@ -27,7 +27,7 @@ class EnvSettings(BaseSettings):
 
     # RabbitMQ configuration
     RBMQ_URL: Optional[str] = "amqp://username:password@localhost:5672,localhost:5673/"
-    RBMQ_CONSUMER_PREFETCH_COUNT: Optional[int] = 20
+    RBMQ_CONSUMER_PREFETCH_COUNT: Optional[int] = 200
     RBMQ_CONSUMER_HOST: Optional[str] = "0.0.0.0"
     RBMQ_CONSUMER_PORT: Optional[int] = 6002
     RBMQ_TASKIQ_EXCHANGE_NAME: Optional[str] = "embpmn_taskiq_exchange"

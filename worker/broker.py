@@ -16,7 +16,7 @@ result_backend = MongoDBResultBackend(
 
 tiq_broker: AsyncBroker = AioPikaBroker(
     url=env.RBMQ_URL,
-    qos=max(os.cpu_count(), env.RBMQ_CONSUMER_PREFETCH_COUNT),
+    qos=env.RBMQ_CONSUMER_PREFETCH_COUNT,
     queue_name=env.RBMQ_TASKIQ_QUEUE_NAME,
     exchange_name=env.RBMQ_TASKIQ_EXCHANGE_NAME,
 ).with_result_backend(result_backend)

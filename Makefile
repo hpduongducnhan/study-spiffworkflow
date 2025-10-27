@@ -3,7 +3,7 @@ run-api-server:
 
 
 run-worker:
-	poetry run taskiq worker worker:tiq_broker --use-process-pool --workers 1 -fsd --tasks-pattern "tiq_tasks/*.py" --log-level INFO
+	poetry run taskiq worker worker:tiq_broker --use-process-pool --workers 4 -fsd --tasks-pattern "tiq_tasks/*.py" --log-level INFO
 
 IMAGE_NAME=loadtestem
 API_CONTAINER_NAME=loadtestem-api
