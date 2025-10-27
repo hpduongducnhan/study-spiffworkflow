@@ -3,7 +3,7 @@ run-api-server:
 
 
 run-worker:
-	poetry run taskiq worker worker:tiq_broker -fsd --tasks-pattern "tiq_tasks/*.py" --log-level INFO
+	poetry run taskiq worker worker:tiq_broker --use-process-pool --workers 1 -fsd --tasks-pattern "tiq_tasks/*.py" --log-level INFO
 
 IMAGE_NAME=loadtestem
 API_CONTAINER_NAME=loadtestem-api
@@ -30,7 +30,7 @@ docker-api-restart:
 
 # Docker Worker container
 docker-worker-up:
-	sudo docker run -d -p 5001:5001 --name ${WORKER_CONTAINER_NAME} ${IMAGE_NAME} make run-worker
+	sudo docker run -d --name ${WORKER_CONTAINER_NAME} ${IMAGE_NAME} make run-worker
 
 docker-worker-down:
 	sudo docker rm -f ${WORKER_CONTAINER_NAME}
