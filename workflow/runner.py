@@ -54,6 +54,15 @@ class WorkflowRunner(
                 print(f'  >> Found needed task id: {need_task_id} ')
         return all_tasks
     
+    async def _count_all_tasks_of_workflow(self, workflow: BpmnWorkflow) -> Dict[str, int]:
+        all_tasks = workflow.get_tasks()
+        count_dict = {}
+        for task in all_tasks:
+            task_spec: BpmnTaskSpec = task.task_spec
+            task_type = type(task_spec).__name__
+            count_dict[task_type] = count_dict.get(task_type, 0) + 1
+        return count_dict
+    
     async def _load_workflow(
         self, 
         wf_id: str=None,  
@@ -65,20 +74,23 @@ class WorkflowRunner(
 
         # start new workflow
         if not wf_id and wf_config_id:
+            print('_load_workflow from configuration 1')
             return await self._load_workflow_from_configuration(wf_config_id, **kwargs)
         
         # resume existing workflow
         if wf_id: 
-            wf_config_model = await self._storage.load_workflow_runtime_state(wf_id, **kwargs)
-            wf_state = await wf_config_model.get_workflow_state()
+            wf_instance_model = await self._storage.load_workflow_runtime_state(wf_id, **kwargs)
+            wf_state = await wf_instance_model.get_workflow_state()
             if wf_state:
                 # deserialize workflow, create BpmnWorkflow object
                 # TODO: should load workflow data when deserializing
                 #       should add event listeners after deserializing
+                print('_load_workflow from instance state')
                 return wf_id, wf_config_id, self._deserialize_workflow(wf_state)
             else:
                 # maybe workflow is created from API but not run yet
                 # in this case, we need to load from configuration
+                print('_load_workflow from configuration 2')
                 return await self._load_workflow_from_configuration(wf_config_id, **kwargs)    
 
     async def _convert_task_id(self, task_id: Optional[str | uuid.UUID]) -> uuid.UUID:
@@ -108,13 +120,15 @@ class WorkflowRunner(
         # ensure task_data is dict if task_id is provided
         if task_id and not isinstance(task_data, dict):
             raise ValueError("task_data must be a dictionary if task_id is provided.")
-
+        
         # should add try/except here
         wf_id, wf_config_id, workflow = await self._load_workflow(wf_id=wf_id, wf_config_id=wf_config_id, **kwargs)
 
+        print(f'--- Running Workflow: wf_id={wf_id}, has tasks {await self._count_all_tasks_of_workflow(workflow)}')
+
         if task_id:
             workflow.do_engine_steps()  # ensure workflow is up-to-date
-            await self._list_all_tasks_of_workflow(workflow, need_task_id=task_id)
+            # await self._list_all_tasks_of_workflow(workflow, need_task_id=task_id)
 
             task: Task = workflow.get_task_from_id(task_id)
             if not task:
@@ -135,7 +149,7 @@ class WorkflowRunner(
             workflow.refresh_waiting_tasks()
 
 
-        workflow = await self._run_all_available_tasks_and_events(workflow, **kwargs)
+        workflow = await self._run_all_available_tasks_and_events(workflow, wf_id=wf_id, **kwargs)
         
         # always save snapshot after running
         await self._storage.save_workflow_runtime_state(
@@ -155,3 +169,16 @@ class WorkflowRunner(
         except Exception as e:
             # print("Error running workflow:", str(e))
             raise e
+
+    async def init_workflow(self, wf_config_id: str, wf_data: Dict={}, **kwargs) -> Tuple[str, str, BpmnWorkflow]:
+        if not self.validated:
+            raise ValueError("WorkflowRunner is not validated. Please call validate() before initializing workflow.")
+
+        # create new workflow instance in storage
+        wf_id, wf_config_id, workflow = await self._load_workflow_from_configuration(wf_config_id, **kwargs)
+        await self._storage.save_workflow_runtime_state(
+            wf_id=wf_id, 
+            state=self._serialize_workflow(workflow),
+            is_completed=workflow.is_completed()
+        )
+        return wf_id, wf_config_id, workflow

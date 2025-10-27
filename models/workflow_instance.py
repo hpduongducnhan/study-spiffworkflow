@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import time
 from uuid import uuid4
 from datetime import datetime
 from typing import  Optional
@@ -39,6 +40,7 @@ class WorkflowInstanceModel(Document):
     @classmethod
     async def new_workflow_instance(cls, workflow_config: WorkflowConfigurationModel, **kwargs) -> Optional["WorkflowInstanceModel"]:
         """Tạo một workflow instance mới."""
+        _start = time.time_ns()
         tenant = kwargs.get("tenant", '1')
         runtime_state = kwargs.get("runtime_state", "")
         workflow_instance = cls(
@@ -53,21 +55,25 @@ class WorkflowInstanceModel(Document):
             runtime_config=workflow_config.config,
         )
         await workflow_instance.commit()
+        print(f'\t\t\t\t: WorkflowInstanceModel.new_workflow_instance - {(time.time_ns() - _start) / 1e6} ms.')
         return workflow_instance
     
     @classmethod
     async def get_by_wf_id(cls, wf_id: str, **kwargs) -> Optional["WorkflowInstanceModel"]:
         """Lấy workflow instance theo wf_id và tenant."""
+        _start = time.time_ns()
         tenant = kwargs.get("tenant", '1')
         condition = {'tenant': tenant, 'wf_id': wf_id}
         # print(f' query condition: {condition} with cls: {cls}')
         workflow_instance = await cls.find_one(condition)
         # print(f' found workflow instance: {workflow_instance.id}')
+        print(f'\t\t\t\t: WorkflowInstanceModel.get_by_wf_id - {(time.time_ns() - _start) / 1e6} ms.')
         return workflow_instance
     
     @classmethod
     async def update_runtime_state(cls, wf_id: str, runtime_state: str, **kwargs) -> Optional["WorkflowInstanceModel"]:
         """Cập nhật runtime_state của workflow instance."""
+        _start = time.time_ns()
         tenant = kwargs.get("tenant", '1')
         workflow_instance = await cls.get_by_wf_id(wf_id, tenant=tenant)
         if not workflow_instance:
@@ -80,6 +86,7 @@ class WorkflowInstanceModel(Document):
             workflow_instance.status = "in_progress"
             
         await workflow_instance.commit()
+        print(f'\t\t\t\t: WorkflowInstanceModel.update_runtime_state - {(time.time_ns() - _start) / 1e6} ms.')
         return workflow_instance
     
     async def get_workflow_id(self) -> str:

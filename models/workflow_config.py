@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
+import time
 from datetime import datetime
 from typing import  Optional
-
 from bson import ObjectId
 from umongo import Document, fields
 from connections import db_conn  
@@ -33,11 +33,13 @@ class WorkflowConfigurationModel(Document):
 
     @classmethod
     async def get_by_wf_id(cls, wf_id: str, tenant: str='1') -> Optional["WorkflowConfigurationModel"]:
+        _start = time.time_ns()
         """Lấy workflow theo wf_id và tenant."""
         condition = {'tenant': tenant, 'wf_id': wf_id}
         # print(f' query condition: {condition} with cls: {cls}')
         workflow = await cls.find_one(condition)
         # print(f' found workflow: {workflow}')
+        print(f'\t\t\t\t: WorkflowConfigurationModel.get_by_wf_id - {(time.time_ns() - _start) / 1e6} ms.')
         return workflow
     
     async def get_workflow_config_id(self) -> str:

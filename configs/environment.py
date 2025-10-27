@@ -30,6 +30,8 @@ class EnvSettings(BaseSettings):
     RBMQ_CONSUMER_PREFETCH_COUNT: Optional[int] = 20
     RBMQ_CONSUMER_HOST: Optional[str] = "0.0.0.0"
     RBMQ_CONSUMER_PORT: Optional[int] = 6002
+    RBMQ_TASKIQ_EXCHANGE_NAME: Optional[str] = "embpmn_taskiq_exchange"
+    RBMQ_TASKIQ_QUEUE_NAME: Optional[str] = "embpmn_taskiq_queue"
 
     # MongoDB configuration
     MONGO_URL: Optional[str] = "mongodb://localhost:27017"
