@@ -20,7 +20,7 @@ from core import (
 #     logger.setLevel(logging.DEBUG)
 
 
-def main():
+def run_old_version():
     storage = Storage()
     node_manager = NodeManager()
     core_runner = CoreRunner(storage, node_manager)
@@ -30,12 +30,52 @@ def main():
         'data',
         '1.xml'
     )
-
     core_runner.run(bpmn_file)
-
-
     core_runner.run(bpmn_file, wf_id='1_1')
+
+async def run_workflow():
+    from workflow import WorkflowRunner, MongoStorage
+    from models import ensure_indexes, WorkflowConfigurationModel, WorkflowInstanceModel
+    from models.initializer import initialize_models
+
+    await ensure_indexes()
+    await initialize_models()   
+
+    mongo_storage = MongoStorage(
+        WorkflowConfigurationModel,
+        WorkflowInstanceModel
+    )
+    workflow_runner = WorkflowRunner()
+    workflow_runner.set_storage(mongo_storage)
+    workflow_runner.validate()
+
+    # To run workflow by wf_config_id
+    # it will create a new workflow instance internally
+    wf_config_id = '8865a29d-7b8a-4766-86f5-48ea9b958cf2'
+    # await workflow_runner.run(
+    #     wf_config_id=wf_config_id
+    # )
+
+    # To run workflow by wf_id
+    # it will load existing workflow instance internally
+    wf_id = '812b4f6d-f897-4f2b-bea8-3203005593c7'
+    # await workflow_runner.run(
+    #     wf_id=wf_id,
+    #     wf_config_id=wf_config_id
+    # )
+
+    # To run user task 
+    user_task_id = '33a06b23-3635-45aa-9823-572dbfb8fa0a'  # example user task id
+    await workflow_runner.run(
+        wf_id=wf_id,
+        wf_config_id=wf_config_id,
+        task_id=user_task_id,   # user task id
+        task_data={               # optional, data to set for the user task
+            'approval': True,
+            'comments': 'Approved by user.'
+        }
+    )
 
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(run_workflow())
