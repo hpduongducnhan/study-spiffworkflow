@@ -36,7 +36,7 @@ class EnvSettings(BaseSettings):
     MONGO_DB_NAME: Optional[str] = "EmBpmn"
 
     # Redis configuration
-    REDIS_URL: Optional[str] = "redis://:password@localhost:6379/0"
+    REDIS_URL: Optional[str] = "redis://:password@localhost:6379/11"
 
     # discord general notification
     DISCORD_TOKEN: Optional[str] = None
